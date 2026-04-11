@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de EPI - Bucagrans</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;min-height:100vh}
+
+/* LOGIN SCREEN */
+#login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1e3a5f 0%,#0f2d4d 100%);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.login-container{background:rgba(255,255,255,.95);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:100%;max-width:450px;padding:50px 40px;text-align:center;backdrop-filter:blur(10px)}
+.login-logo{margin-bottom:30px}
+.login-logo img{max-width:180px;height:auto;drop-shadow:0 4px 12px rgba(30,58,95,.15)}
+.login-title{font-size:28px;font-weight:800;color:#1e3a5f;margin-bottom:8px}
+.login-subtitle{color:#6b7280;font-size:14px;margin-bottom:30px}
+.login-field{margin-bottom:18px;text-align:left}
+.login-field label{display:block;font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.login-field input{width:100%;padding:12px 15px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:all .2s}
+.login-field input:focus{border-color:#1e3a5f;box-shadow:0 0 0 3px rgba(30,58,95,.1)}
+#login-error{margin-bottom:20px;padding:12px 15px;border-radius:10px;background:#fee2e2;color:#991b1b;font-size:13px;display:none;border:1px solid #fecaca}
+.login-button{width:100%;padding:13px;background:#1e3a5f;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;margin-bottom:12px}
+.login-button:hover{background:#0f2d4d;box-shadow:0 8px 20px rgba(30,58,95,.2)}
+.login-button:active{transform:scale(.98)}
+.login-footer{font-size:12px;color:#9ca3af;margin-top:20px}
+
+/* SISTEMA */
+.header{background:#fff;padding:0 28px;border-bottom:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 0}
+.logo{width:90px;height:90px;background:transparent;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#1e3a5f;flex-shrink:0;overflow:hidden}
+.brand{color:#1e3a5f;font-weight:800;font-size:17px}
+.brand-sub{color:#9ca3af;font-size:11px}
+.user-section{display:flex;align-items:center;gap:12px}
+.user-info{color:#6b7280;font-size:12px}
+.logout-btn{padding:6px 14px;background:#ef4444;color:#fff;border:none;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;transition:all .2s}
+.logout-btn:hover{background:#dc2626;opacity:.9}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{padding:9px 16px;border:none;background:transparent;color:#6b7280;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;transition:all .2s}
+.tab.active{background:#f3f4f6;color:#1e3a5f;box-shadow:inset 0 0 0 2px #f59e0b}
+.tab:hover:not(.active){background:#f3f4f6;color:#1e3a5f}
+.sync-bar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#64748b;flex-shrink:0;transition:background .3s}
+.sync-dot.ok{background:#22c55e}
+.sync-dot.err{background:#ef4444}
+.sync-dot.loading{background:#f59e0b;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sync-label{font-size:11px;color:#9ca3af}
+
+.content{padding:24px 28px;max-width:1400px;margin:0 auto}
+.section-title{font-weight:800;font-size:19px;color:#1e3a5f;margin-bottom:4px}
+.section-sub{color:#6b7280;font-size:13px;margin-bottom:20px}
+.cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:800px;margin-bottom:28px}
+.action-card{background:#fff;border-radius:16px;padding:24px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.action-card h3{font-weight:800;font-size:15px;color:#1e293b;margin-bottom:6px}
+.action-card p{color:#6b7280;font-size:13px;margin-bottom:18px;line-height:1.5}
+.btn{padding:10px 20px;border:none;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn:hover{opacity:.88}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-red{background:#ef4444;color:#fff}
+.btn-green{background:#22c55e;color:#fff}
+.btn-yellow{background:#f59e0b;color:#fff}
+.btn-purple{background:#7c3aed;color:#fff}
+.btn-gray{background:#9ca3af;color:#fff}
+.filter-bar{background:#fff;border-radius:14px;padding:14px 18px;margin-bottom:18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border:1px solid #e5e7eb}
+.filter-bar input,.filter-bar select{padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:9px;font-size:14px;font-family:inherit;outline:none;background:#fff}
+.table-wrap{background:#fff;border-radius:14px;border:1px solid #e5e7eb;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:#f8fafc;border-bottom:2px solid #e5e7eb}
+th{padding:11px 13px;text-align:left;font-weight:700;color:#374151;font-size:11px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+td{padding:10px 13px}
+tbody tr{border-bottom:1px solid #f1f5f9;transition:background .15s}
+tbody tr:nth-child(even){background:#fafafa}
+tbody tr:hover{background:#f0f9ff}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px;padding:28px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal-title{font-weight:800;font-size:17px;color:#1e3a5f;margin-bottom:2px}
+.modal-sub{color:#6b7280;font-size:13px;margin-bottom:20px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:700;color:#374151;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select{width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:9px;font-size:14px;font-family:inherit;outline:none;background:#fff}
+.btn-row{display:flex;gap:10px}
+.toast{display:none;position:fixed;bottom:28px;right:28px;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;z-index:200;box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.toast.show{display:block}
+.toast-ok{background:#dcfce7;color:#166534;border:1.5px solid #166534}
+.toast-warn{background:#fef9c3;color:#854d0e;border:1.5px solid #854d0e}
+.toast-err{background:#fee2e2;color:#991b1b;border:1.5px solid #991b1b}
+.panel{display:none}
+.panel.active{display:block}
+#loading-screen{position:fixed;inset:0;background:#1e3a5f;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px;color:#94a3b8;display:none}
+.logo-big{width:64px;height:64px;background:#f59e0b;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;color:#1e3a5f}
+.spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,.15);border-top-color:#f59e0b;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:700px){.cards-grid{grid-template-columns:1fr}.content{padding:16px}.login-container{padding:30px 20px}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-container">
+    <div class="login-logo">
+      <img src="logo.png" alt="Bucagrans Logo" onerror="this.style.display='none'">
+    </div>
+    <div class="login-title">CONTROLE DE EPI</div>
+    <div class="login-subtitle">Bucagrans - Gestão de Equipamentos</div>
+    <div id="login-error"></div>
+    <div class="login-field">
+      <label>Usuário</label>
+      <input id="login-user" type="text" placeholder="Digite seu usuário" onkeypress="if(event.key==='Enter') doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input id="login-pass" type="password" placeholder="Digite sua senha" onkeypress="if(event.key==='Enter') doLogin()">
+    </div>
+    <button class="login-button" onclick="doLogin()">Entrar</button>
+    <div class="login-footer">Pch Lebon Régis © 2026</div>
+  </div>
+</div>
+
+<!-- MAIN SYSTEM -->
+<div class="header">
+  <div class="header-inner">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="logo"><img src="logo.png" alt="Logo" style="width:100%;height:100%;object-fit:contain"></div>
+      <div>
+        <div class="brand">CONTROLE DE EPI</div>
+        <div class="brand-sub">Bucagrans - Dados em tempo real</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      <div class="sync-bar">
+        <div class="sync-dot loading" id="sync-dot"></div>
+        <span class="sync-label" id="sync-label">Conectando...</span>
+      </div>
+      <div class="user-section">
+        <span class="user-info" id="user-display"></span>
+        <button class="logout-btn" onclick="doLogout()">Sair</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('movimentacao',event)">Movimentacao</button>
+        <button class="tab" onclick="showTab('estoque',event)">Estoque</button>
+        <button class="tab" onclick="showTab('historico',event)">Historico</button>
+        <button class="tab" onclick="showTab('compras',event)">Compras</button>
+        <button class="tab" onclick="showTab('auditoria',event)" id="tab-auditoria" style="background:#7c3aed;color:#fff;display:none">Auditoria</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+  <div class="panel active" id="panel-movimentacao">
+    <div class="section-title">Movimentacao de EPI</div>
+    <div class="section-sub">Selecione a operacao que deseja realizar</div>
+    <div class="cards-grid">
+      <div class="action-card"><h3>Registrar Saida</h3><p>EPI retirado do estoque para uso</p><button class="btn btn-red" onclick="openModal('saida')">Registrar Saida</button></div>
+      <div class="action-card"><h3>Registrar Entrada</h3><p>Recebimento de EPI novo ao estoque</p><button class="btn btn-green" onclick="openModal('entrada')">Registrar Entrada</button></div>
+      <div class="action-card"><h3>Dar Baixa</h3><p>Descarte ou devolucao registrado</p><button class="btn btn-yellow" onclick="openModal('baixa')">Registrar Baixa</button></div>
+      <div class="action-card"><h3>Solicitar Compra</h3><p>Envie um pedido de compra de EPI</p><button class="btn btn-purple" onclick="openModal('solicitar')">Solicitar Compra</button></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-estoque">
+    <div class="filter-bar">
+      <input type="text" id="search" placeholder="Buscar EPI..." oninput="renderEstoque()">
+    </div>
+    <div class="table-wrap"><div class="table-scroll"><table>
+      <thead><tr><th>Cod</th><th>EPI</th><th>Atual</th><th>Minimo</th><th>Status</th></tr></thead>
+      <tbody id="tbody-estoque"></tbody>
+    </table></div></div>
+  </div>
+
+  <div class="panel" id="panel-historico">
+    <div class="section-title">Historico de Movimentacoes</div>
+    <div class="table-wrap"><div class="table-scroll"><table>
+      <thead><tr><th>Tipo</th><th>EPI</th><th>Qtd</th><th>Colaborador</th><th>Data</th></tr></thead>
+      <tbody id="tbody-historico"></tbody>
+    </table></div></div>
+  </div>
+
+  <div class="panel" id="panel-compras">
+    <div class="section-title">Solicitacoes de Compra</div>
+    <div class="table-wrap"><div class="table-scroll"><table>
+      <thead><tr><th>EPI</th><th>Solicitante</th><th>Qtd</th><th>Status</th><th>Data</th></tr></thead>
+      <tbody id="tbody-compras"></tbody>
+    </table></div></div>
+  </div>
+
+  <div class="panel" id="panel-auditoria">
+    <div class="section-title">Auditoria - Historico de Alteracoes</div>
+    <div class="table-wrap"><div class="table-scroll"><table>
+      <thead><tr><th>Data/Hora</th><th>Usuario</th><th>Acao</th><th>Detalhes</th></tr></thead>
+      <tbody id="tbody-auditoria"></tbody>
+    </table></div></div>
+  </div>
+</div>
+
+<!-- MODAIS -->
+<div class="overlay" id="modal-saida"><div class="modal">
+  <div class="modal-title">Registrar Saida</div><div class="modal-sub">EPI sendo retirado do estoque</div>
+  <div class="field"><label>Colaborador *</label><input id="s-nome" placeholder="Nome"></div>
+  <div class="field"><label>EPI *</label><select id="s-epi"><option value="">Selecione...</option></select></div>
+  <div class="field"><label>Quantidade *</label><input id="s-qtd" type="number" value="1" min="1"></div>
+  <div class="btn-row"><button class="btn btn-red" onclick="doSaida()">Confirmar</button><button class="btn btn-gray" onclick="closeModal('saida')">Cancelar</button></div>
+</div></div>
+
+<div class="overlay" id="modal-entrada"><div class="modal">
+  <div class="modal-title">Registrar Entrada</div><div class="modal-sub">Recebimento ao estoque</div>
+  <div class="field"><label>Responsavel *</label><input id="e-nome" placeholder="Nome"></div>
+  <div class="field"><label>EPI *</label><select id="e-epi"><option value="">Selecione...</option></select></div>
+  <div class="field"><label>Quantidade *</label><input id="e-qtd" type="number" value="1" min="1"></div>
+  <div class="btn-row"><button class="btn btn-green" onclick="doEntrada()">Confirmar</button><button class="btn btn-gray" onclick="closeModal('entrada')">Cancelar</button></div>
+</div></div>
+
+<div class="overlay" id="modal-baixa"><div class="modal">
+  <div class="modal-title">Dar Baixa</div><div class="modal-sub">Descarte ou devolucao</div>
+  <div class="field"><label>Colaborador *</label><input id="b-nome" placeholder="Nome"></div>
+  <div class="field"><label>EPI *</label><select id="b-epi"><option value="">Selecione...</option></select></div>
+  <div class="field"><label>Quantidade *</label><input id="b-qtd" type="number" value="1" min="1"></div>
+  <div class="field"><label>Motivo *</label><select id="b-motivo"><option value="">Selecione...</option><option>Desgaste</option><option>Danificado</option><option>Vencido</option><option>Perda</option></select></div>
+  <div class="btn-row"><button class="btn btn-yellow" onclick="doBaixa()">Confirmar</button><button class="btn btn-gray" onclick="closeModal('baixa')">Cancelar</button></div>
+</div></div>
+
+<div class="overlay" id="modal-solicitar"><div class="modal">
+  <div class="modal-title">Solicitar Compra</div><div class="modal-sub">Pedido de EPI</div>
+  <div class="field"><label>Seu nome *</label><input id="sol-nome" placeholder="Nome"></div>
+  <div class="field"><label>EPI solicitado *</label><input id="sol-epi" placeholder="Qual EPI"></div>
+  <div class="field"><label>Quantidade *</label><input id="sol-qtd" type="number" value="1" min="1"></div>
+  <div class="btn-row"><button class="btn btn-purple" onclick="doSolicitar()">Enviar</button><button class="btn btn-gray" onclick="closeModal('solicitar')">Cancelar</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, limit, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDbazj5rFmmvldtxmc4rWQBVBxunlujd-4",
+  authDomain: "controle-epi-55ab8.firebaseapp.com",
+  projectId: "controle-epi-55ab8",
+  storageBucket: "controle-epi-55ab8.firebasestorage.app",
+  messagingSenderId: "62235419521",
+  appId: "1:62235419521:web:876727bb22f92549b33e80"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+let data=[], historico=[], solicitacoes=[], auditoria=[], activeTab='movimentacao', usuarioAtual=null;
+
+const EPIs = [
+  {cod:"1",epi:"BOTA COURO COM BIQUEIRA",tamanho:"38",ca:"43377",estoque_atual:5,estoque_minimo:5,status:"OK"},
+  {cod:"2",epi:"BOTA COURO COM BIQUEIRA",tamanho:"40",ca:"43377",estoque_atual:4,estoque_minimo:10,status:"COMPRAR"},
+  {cod:"3",epi:"CAPACETE ABA FRONTAL",tamanho:"U",ca:"0",estoque_atual:10,estoque_minimo:5,status:"OK"},
+  {cod:"4",epi:"CINTO DE SEGURANCA",tamanho:"U",ca:"0",estoque_atual:8,estoque_minimo:5,status:"OK"},
+  {cod:"5",epi:"LUVA DE NITRILA",tamanho:"M",ca:"0",estoque_atual:10,estoque_minimo:5,status:"OK"},
+  {cod:"6",epi:"LUVA DE NITRILA",tamanho:"G",ca:"0",estoque_atual:15,estoque_minimo:10,status:"OK"},
+  {cod:"7",epi:"MASCARA DESCARTAVEL",tamanho:"U",ca:"0",estoque_atual:50,estoque_minimo:50,status:"OK"},
+  {cod:"8",epi:"OCULOS DE PROTECAO",tamanho:"U",ca:"0",estoque_atual:15,estoque_minimo:10,status:"OK"},
+  {cod:"9",epi:"PROTETOR AURICULAR",tamanho:"U",ca:"0",estoque_atual:40,estoque_minimo:20,status:"OK"},
+  {cod:"10",epi:"UNIFORME CALCA",tamanho:"P",ca:"0",estoque_atual:50,estoque_minimo:15,status:"OK"}
+];
+
+const itemKey = i => i.cod+'-'+i.tamanho;
+const nowStr = () => new Date().toLocaleString('pt-BR');
+
+async function seedEstoque(){
+  const snap = await getDocs(collection(db,'estoque'));
+  if(snap.empty){
+    for(const epi of EPIs){
+      const key = epi.cod+'-'+epi.tamanho;
+      await setDoc(doc(db,'estoque',key),epi);
+    }
+  }
+}
+  const user=document.getElementById('login-user').value.trim();
+  const pass=document.getElementById('login-pass').value.trim();
+  const loginError=document.getElementById('login-error');
+
+  if(!user||!pass){
+    loginError.textContent='Informe usuario e senha';
+    loginError.style.display='block';
+    return;
+  }
+
+  const usuariosValidos={'Equiel':'Cavalo@','Jose':'tstbuca'};
+
+  if(usuariosValidos[user]===pass){
+    sessionStorage.setItem('epi_auth',JSON.stringify({user,ts:new Date().getTime()}));
+    document.getElementById('login-screen').style.display='none';
+    init();
+  }else{
+    loginError.textContent='Usuario ou senha invalidos';
+    loginError.style.display='block';
+  }
+};
+
+window.doLogout=function(){
+  sessionStorage.removeItem('epi_auth');
+  location.reload();
+};
+
+window.openModal=function(name){
+  document.getElementById('modal-'+name).classList.add('open');
+};
+
+window.closeModal=function(name){
+  document.getElementById('modal-'+name).classList.remove('open');
+};
+
+document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{
+  if(e.target===el) el.classList.remove('open');
+}));
+
+function showToast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='toast show toast-'+type;
+  setTimeout(()=>el.className='toast',3000);
+}
+
+window.showTab=function(name,ev){
+  if(name==='auditoria' && usuarioAtual!=='Equiel'){
+    showToast('Acesso negado','err');
+    return;
+  }
+  activeTab=name;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  if(ev?.target) ev.target.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+};
+
+async function init(){
+  const auth=sessionStorage.getItem('epi_auth');
+  if(!auth){
+    document.getElementById('login-screen').style.display='flex';
+    return;
+  }
+
+  const authData=JSON.parse(auth);
+  usuarioAtual=authData.user;
+  const header=document.querySelector('.header');
+  header.style.display='block';
+  document.getElementById('user-display').textContent='Usuario: '+authData.user;
+
+  if(usuarioAtual==='Equiel'){
+    document.getElementById('tab-auditoria').style.display='block';
+  }
+
+  try{
+    await seedEstoque();
+
+    onSnapshot(collection(db,'estoque'), snap=>{
+      data = snap.docs.map(d=>d.data());
+      renderEstoque();
+    });
+
+    onSnapshot(query(collection(db,'historico'),orderBy('ts','desc'),limit(200)), snap=>{
+      historico = snap.docs.map(d=>d.data());
+      renderHistorico();
+    });
+
+    onSnapshot(query(collection(db,'solicitacoes'),orderBy('ts','desc')), snap=>{
+      solicitacoes = snap.docs.map(d=>d.data());
+      renderCompras();
+    });
+
+    onSnapshot(query(collection(db,'auditoria'),orderBy('ts','desc'),limit(500)), snap=>{
+      auditoria = snap.docs.map(d=>d.data());
+      if(activeTab==='auditoria') renderAuditoria();
+    });
+  }catch(e){
+    showToast('Erro ao conectar','err');
+  }
+}
+
+function renderEstoque(){
+  const q=(document.getElementById('search')||{value:''}).value.toLowerCase();
+  let list=data.filter(d=>!q||d.epi.toLowerCase().includes(q));
+  document.getElementById('tbody-estoque').innerHTML=list.map(item=>{
+    const key=item.cod+'-'+item.tamanho;
+    return `<tr><td>${item.cod}</td><td><strong>${item.epi}</strong></td><td>${item.estoque_atual}</td><td>${item.estoque_minimo}</td><td><span style="background:${item.status==='OK'?'#dcfce7':'#fee2e2'};color:${item.status==='OK'?'#166534':'#991b1b'};padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700">${item.status}</span></td></tr>`;
+  }).join('')||'<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:20px">Nenhum item</td></tr>';
+
+  // Preencher selects dos modais
+  ['s-epi','e-epi','b-epi'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(sel) sel.innerHTML='<option value="">Selecione...</option>'+data.map(d=>`<option value="${d.cod}-${d.tamanho}">${d.epi} (${d.tamanho}) - Est: ${d.estoque_atual}</option>`).join('');
+  });
+}
+
+function renderHistorico(){
+  const rows=historico.map(h=>`<tr><td><span style="background:${h.tipo==='ENTRADA'?'#dcfce7':'#fee2e2'};color:${h.tipo==='ENTRADA'?'#166534':'#991b1b'};padding:2px 6px;border-radius:3px;font-size:11px;font-weight:700">${h.tipo}</span></td><td><strong>${h.epi}</strong></td><td>${h.qtd}x</td><td>${h.colaborador}</td><td style="font-size:12px;color:#9ca3af">${h.data}</td></tr>`).join('');
+  document.getElementById('tbody-historico').innerHTML=rows||'<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:20px">Nenhuma movimentacao</td></tr>';
+}
+
+function renderCompras(){
+  const rows=solicitacoes.map(s=>`<tr><td><strong>${s.epi}</strong></td><td>${s.solicitante}</td><td>${s.qtd}x</td><td><span style="background:${s.status==='PENDENTE'?'#fef9c3':'#dcfce7'};color:${s.status==='PENDENTE'?'#854d0e':'#166534'};padding:2px 6px;border-radius:3px;font-size:11px;font-weight:700">${s.status}</span></td><td style="font-size:12px;color:#9ca3af">${s.data}</td></tr>`).join('');
+  document.getElementById('tbody-compras').innerHTML=rows||'<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:20px">Nenhuma solicitacao</td></tr>';
+}
+
+function renderAuditoria(){
+  const rows=auditoria.map(a=>`<tr><td style="font-size:12px">${a.data}</td><td><strong>${a.usuario}</strong></td><td>${a.acao}</td><td style="font-size:12px">${a.detalhes}</td></tr>`).join('');
+  document.getElementById('tbody-auditoria').innerHTML=rows||'<tr><td colspan="4" style="text-align:center;color:#9ca3af;padding:20px">Sem registros</td></tr>';
+}
+
+window.doSaida=async function(){
+  const nome=document.getElementById('s-nome').value.trim();
+  const epiKey=document.getElementById('s-epi').value;
+  const qtd=parseInt(document.getElementById('s-qtd').value);
+  if(!nome||!epiKey||!qtd) return showToast('Preencha todos os campos','err');
+  try{
+    const item=data.find(d=>(d.cod+'-'+d.tamanho)===epiKey);
+    await addDoc(collection(db,'historico'),{tipo:'SAIDA',epi:item.epi,tamanho:item.tamanho,qtd,colaborador:nome,data:nowStr(),ts:new Date()});
+    showToast('Saida registrada!','ok');
+    closeModal('saida');
+  }catch(e){showToast('Erro ao salvar','err');}
+};
+
+window.doEntrada=async function(){
+  const nome=document.getElementById('e-nome').value.trim();
+  const epiKey=document.getElementById('e-epi').value;
+  const qtd=parseInt(document.getElementById('e-qtd').value);
+  if(!nome||!epiKey||!qtd) return showToast('Preencha todos os campos','err');
+  try{
+    const item=data.find(d=>(d.cod+'-'+d.tamanho)===epiKey);
+    await addDoc(collection(db,'historico'),{tipo:'ENTRADA',epi:item.epi,tamanho:item.tamanho,qtd,colaborador:nome,data:nowStr(),ts:new Date()});
+    showToast('Entrada registrada!','ok');
+    closeModal('entrada');
+  }catch(e){showToast('Erro ao salvar','err');}
+};
+
+window.doBaixa=async function(){
+  const nome=document.getElementById('b-nome').value.trim();
+  const epiKey=document.getElementById('b-epi').value;
+  const qtd=parseInt(document.getElementById('b-qtd').value);
+  const motivo=document.getElementById('b-motivo').value;
+  if(!nome||!epiKey||!qtd||!motivo) return showToast('Preencha todos os campos','err');
+  try{
+    const item=data.find(d=>(d.cod+'-'+d.tamanho)===epiKey);
+    await addDoc(collection(db,'historico'),{tipo:'BAIXA',epi:item.epi,tamanho:item.tamanho,qtd,colaborador:nome,motivo,data:nowStr(),ts:new Date()});
+    showToast('Baixa registrada!','ok');
+    closeModal('baixa');
+  }catch(e){showToast('Erro ao salvar','err');}
+};
+
+window.doSolicitar=async function(){
+  const nome=document.getElementById('sol-nome').value.trim();
+  const epi=document.getElementById('sol-epi').value.trim();
+  const qtd=parseInt(document.getElementById('sol-qtd').value);
+  if(!nome||!epi||!qtd) return showToast('Preencha todos os campos','err');
+  try{
+    await addDoc(collection(db,'solicitacoes'),{solicitante:nome,epi,qtd,data:nowStr(),status:'PENDENTE',ts:new Date()});
+    showToast('Solicitacao enviada!','ok');
+    closeModal('solicitar');
+  }catch(e){showToast('Erro ao salvar','err');}
+};
+
+document.querySelector('.header').style.display='none';
+
+(function(){
+  const auth=sessionStorage.getItem('epi_auth');
+  if(auth) init();
+})();
+</script>
+
+</body>
+</html>
