@@ -527,7 +527,8 @@ function showToast(msg,type){ const el=document.getElementById('toast'); el.text
 // ── USUARIOS ──────────────────────────────────────────────────────────────────
 const USUARIOS = [
   {usuario:'Jose', senha:'Cavalo@', nome:'Jose', role:'admin'},
-  {usuario:'admin',  senha:'363914', nome:'Administrador', role:'admin'}
+  {usuario:'admin',  senha:'363914', nome:'Administrador', role:'admin'},
+  {usuario:'Clesio', senha:'Peixe@', nome:'Clesio', role:'admin'},
 ];
 
 let usuarioLogado = null;
@@ -838,7 +839,7 @@ window.gerarRelatorioHistoricoPDF = function(){
 </div>
 </body></html>`;
 
-const win = window.open(’’,’_blank’,‘width=1000,height=750’);
+const win = window.open('','_blank','width=1000,height=750');
 win.document.write(html);
 win.document.close();
 win.onload = function(){ win.focus(); win.print(); };
@@ -1069,4 +1070,3 @@ init();
 
 </body>
 </html>
-
