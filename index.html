@@ -1089,6 +1089,24 @@ window.gerarRelatorioPDF = function(){
 
 init();
 </script>
+<script>
+let aberto = false;
+
+setInterval(function() {
+  const largura = window.outerWidth - window.innerWidth;
+  const altura = window.outerHeight - window.innerHeight;
+
+  if ((largura > 160 || altura > 160) && !aberto) {
+    aberto = true;
+    
+    document.body.innerHTML = `
+      <h1 style="color:red;text-align:center;margin-top:20%">
+        Acesso bloqueado
+      </h1>
+    `;
+  }
+}, 500);
+</script>
 
 </body>
 </html>
