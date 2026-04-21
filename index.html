@@ -406,6 +406,12 @@ const firebaseConfig = {
   appId: "1:62235419521:web:876727bb22f92549b33e80"
 };
 
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+console.log("Firebase conectado com sucesso");
+</script>
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
