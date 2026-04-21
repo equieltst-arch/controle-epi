@@ -394,18 +394,23 @@ td[style*="color:#22c55e"]{color:#4ade80!important}
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, setDoc, addDoc, onSnapshot, updateDoc, serverTimestamp, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getFirestore, collection, doc, getDocs, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDbazj5rFmmvldtxmc4rWQBVBxunlujd-4",
+  apiKey: "AIzaSyDbazj5rFmmv1dtxmc4rWQBV8xunlugd-4",
   authDomain: "controle-epi-55ab8.firebaseapp.com",
   projectId: "controle-epi-55ab8",
-  storageBucket: "controle-epi-55ab8.firebasestorage.app",
+  storageBucket: "controle-epi-55ab8.appspot.com",
   messagingSenderId: "62235419521",
   appId: "1:62235419521:web:876727bb22f92549b33e80"
 };
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+console.log("Firebase conectado com sucesso");
+</script>
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 
